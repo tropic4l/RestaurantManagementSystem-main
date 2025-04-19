@@ -1,8 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 
-from orderedproducts import OrderedProducts
-from database import Database
+from BASE.Components.orderedproducts import OrderedProducts
+from BASE.Components.database import Database
+
 
 
 class KitchenWindow(tk.Toplevel):

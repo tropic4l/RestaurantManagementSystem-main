@@ -4,20 +4,26 @@ from tkinter import ttk
 from PIL import ImageTk, Image
 from sqlite3 import Error
 
-from printorders import PrintOrders
-from configwindow import ConfigWindow
-from kitchenwindow import KitchenWindow
-from createorders import CreateOrders
-from aboutwindow import AboutWindow
-from database import Database
+from BASE.Components.printorders import PrintOrders
+from BASE.Components.configwindow import ConfigWindow
+from BASE.Components.kitchenwindow import KitchenWindow
+from BASE.Components.createorders import CreateOrders
+from BASE.Components.aboutwindow import AboutWindow
+from BASE.Components.database import Database
+
+from BASE.Components.reservations import ReservationUI
+from BASE.Components.inventory import InventoryUI
+from BASE.Components.staff_schedule import StaffScheduleUI
+
 
 # basedir = os.path.dirname(__file__)
 # print(basedir)
 
 
 class MainWindow(tk.Tk):
-    def __init__(self):
+    def __init__(self, role = "guest"): # role param
         super().__init__()
+        self.role = role # store role
 
         self.win_width = 600
         self.win_height = 400
@@ -43,18 +49,36 @@ class MainWindow(tk.Tk):
         self.iconphoto(True, self.python_image)
 
         self.menubar = tk.Menu(self.m_frame)
+        # REPLACEMENT: File menu with role-based access
+        can_order = self.role in ["admin", "staff"]
+        can_kitchen = self.role in ["admin", "chef"]
+        can_print = self.role in ["admin", "staff", "chef"]
+        can_manage = self.role in ["admin", "manager"]
+
         self.filebar = tk.Menu(self.menubar, tearoff=0)
-        self.filebar.add_cascade(
-            label="Print Receipts", command=self.print_win, state=tk.DISABLED)
-        self.filebar.add_cascade(
-            label="Kitchen", command=self.kitchen_win, state=tk.DISABLED)
-        self.filebar.add_cascade(
-            label="Create Orders", command=self.customer_win, state=tk.DISABLED)
-        self.filebar.add_cascade(
-            label="Configure Facility/Menu", command=self.config_window)
+        self.filebar.add_cascade(label="Print Receipts", command=self.print_win, state=tk.NORMAL if can_print else tk.DISABLED)
+        self.filebar.add_cascade(label="Kitchen", command=self.kitchen_win, state=tk.NORMAL if can_kitchen else tk.DISABLED)
+        self.filebar.add_cascade(label="Create Orders", command=self.customer_win, state=tk.NORMAL if can_order else tk.DISABLED)
+        self.filebar.add_cascade(label="Configure Facility/Menu", command=self.config_window)
         self.filebar.add_separator()
         self.filebar.add_cascade(label="Exit", command=self.quit)
         self.menubar.add_cascade(label="File", menu=self.filebar)
+
+        # 🔹 NEW: Manage menu shown only for certain roles
+        if can_manage:
+            self.managebar = tk.Menu(self.menubar, tearoff=0)
+            self.managebar.add_command(label="Reservations", command=self.open_reservations)
+            self.managebar.add_command(label="Inventory", command=self.open_inventory)
+            self.managebar.add_command(label="Staff Scheduling", command=self.open_staff_schedule)
+            self.menubar.add_cascade(label="Manage", menu=self.managebar)
+
+
+        # Manage Menu
+        self.managebar = tk.Menu(self.menubar, tearoff=0)
+        self.managebar.add_command(label="Reservations", command=self.open_reservations)
+        self.managebar.add_command(label="Inventory", command=self.open_inventory)
+        self.managebar.add_command(label="Staff Scheduling", command=self.open_staff_schedule)
+        self.menubar.add_cascade(label="Manage", menu=self.managebar)
 
         self.helpmenu = tk.Menu(self.menubar, tearoff=0)
         self.helpmenu.add_command(label="About...", command=self.about_win)
@@ -122,3 +146,15 @@ class MainWindow(tk.Tk):
     def print_win(self):
         print_win = PrintOrders(self)
         print_win.grab_set()
+
+    def open_reservations(self):
+        res_win = ReservationUI(self)
+        res_win.grab_set()
+
+    def open_inventory(self):
+        inv_win = InventoryUI(self)
+        inv_win.grab_set()
+
+    def open_staff_schedule(self):
+        staff_win = StaffScheduleUI(self)
+        staff_win.grab_set()

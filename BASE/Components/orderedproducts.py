@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from sqlite3 import Error
+from BASE.Components.database import Database
 
-from database import Database
 
 
 class OrderedProducts(tk.Frame):

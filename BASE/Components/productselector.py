@@ -3,7 +3,8 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import ImageTk, Image
 
-from database import Database
+from BASE.Components.database import Database
+
 
 
 class ProductSelector(tk.Frame):

@@ -1,14 +1,23 @@
+import sqlite3
+
 class StaffModel:
-    def __init__(self, db=None):
-        self.db = db or self.connect_to_db()
+    def __init__(self):
+        self.conn = sqlite3.connect("restaurant.db")
+        self.cur = self.conn.cursor()
+        self.cur.execute("""
+            CREATE TABLE IF NOT EXISTS staff (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                role TEXT NOT NULL,
+                shift TEXT NOT NULL
+            );
+        """)
+        self.conn.commit()
 
-    def connect_to_db(self):
-        import sqlite3
-        return sqlite3.connect("restaurant.db")
+    def save_staff(self, name, role, shift):
+        self.cur.execute("INSERT INTO staff (name, role, shift) VALUES (?, ?, ?)", (name, role, shift))
+        self.conn.commit()
 
-    def add_shift(self, staff_id, name, role, shift_start, shift_end):
-        cursor = self.db.cursor()
-        cursor.execute(
-            "INSERT INTO staff (staff_id, name, role, shift_start, shift_end) VALUES (?, ?, ?, ?, ?)",
-            (staff_id, name, role, shift_start, shift_end))
-        self.db.commit()
+    def get_all_staff(self):
+        self.cur.execute("SELECT * FROM staff")
+        return self.cur.fetchall()

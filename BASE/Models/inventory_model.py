@@ -1,14 +1,25 @@
+import sqlite3
+
 class InventoryModel:
-    def __init__(self, db=None):
-        self.db = db or self.connect_to_db()
+    def __init__(self):
+        self.conn = sqlite3.connect("restaurant.db")
+        self.cur = self.conn.cursor()
+        self.cur.execute("""
+            CREATE TABLE IF NOT EXISTS inventory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                item_name TEXT NOT NULL,
+                quantity INTEGER NOT NULL,
+                reorder_level INTEGER NOT NULL
+            );
+        """)
+        self.conn.commit()
 
-    def connect_to_db(self):
-        import sqlite3
-        return sqlite3.connect("restaurant.db")
+    def add_item(self, name, quantity, reorder_level):
+        self.cur.execute("""
+            INSERT INTO inventory (item_name, quantity, reorder_level)
+            VALUES (?, ?, ?)""", (name, quantity, reorder_level))
+        self.conn.commit()
 
-    def add_item(self, item_name, quantity, threshold, supplier):
-        cursor = self.db.cursor()
-        cursor.execute(
-            "INSERT INTO inventory (item_name, quantity, threshold, supplier) VALUES (?, ?, ?, ?)",
-            (item_name, quantity, threshold, supplier))
-        self.db.commit()
+    def get_all_items(self):
+        self.cur.execute("SELECT * FROM inventory")
+        return self.cur.fetchall()
