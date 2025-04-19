@@ -181,7 +181,27 @@ class PrintOrders(tk.Toplevel):
             p_or_fl.write(str_doc)
 
         webbrowser.open_new_tab(f"order_{self.t_num}.html")
+
+        self.export_pdf(self.t_num, [self.tr_view.item(child)['values'] for child in self.tr_view.get_children()]) # generation of a PDF receipt
+
         self.clear_all()
+
+    def export_pdf(self, table_num, data_rows):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(200, 10, txt=f"Receipt - Table {table_num}", ln=True, align='C')
+
+        pdf.ln(10)
+        for row in data_rows:
+            pdf.cell(200, 10, txt=f"{row[1]} x{row[2]} - {row[3]} Ft", ln=True)
+
+        total = sum(float(row[3]) for row in data_rows)
+        pdf.ln(10)
+        pdf.cell(200, 10, txt=f"Total: {total} Ft", ln=True)
+
+        pdf.output(f"receipt_table_{table_num}.pdf")
+
 
     def clear_all(self):
         self.tb_name_entry.delete(0, tk.END)

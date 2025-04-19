@@ -27,12 +27,11 @@ class LoginUI(tk.Tk):
         username = self.username_entry.get()
         password = self.password_entry.get()
 
-        if self.model.authenticate_user(username, password):
-            role = self.model.get_user_role(username) # get role
-            messagebox.showinfo("Login Success", "Welcome!")
+        user = self.model.authenticate_user(username, password)
+
+        if user:
             self.destroy()
-            main_window = MainWindow(role = role) # pass role
+            main_window = MainWindow(role=user["role"], username=user["username"])
             main_window.mainloop()
         else:
-            messagebox.showerror("Login Failed", "Invalid credentials!")
-
+            messagebox.showerror("Login Failed", "Invalid Credentials!")

@@ -143,6 +143,9 @@ class OrderedProducts(tk.Frame):
                 or_total = or_quantity * or_price
                 self.fac_db.insert_spec_config(
                     spec_insert_query, (order_id, self.t_num, or_name, or_quantity, or_total))
+                update_query = """UPDATE inventory SET quantity = quantity - ? WHERE item_name = ?"""
+                self.fac_db.update(update_query, (or_quantity, or_name))
+
         except Error as e:
             print(e)
 
